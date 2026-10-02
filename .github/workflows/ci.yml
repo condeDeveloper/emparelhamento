@@ -1,0 +1,50 @@
+name: testes
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  testes:
+    runs-on: ${{ matrix.so }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        so: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      # O juiz enumera as n! atribuicoes e separa as estaveis pela DEFINICAO,
+      # procurando par bloqueador entre os n^2 pares. Ele nao sabe o que e
+      # Gale-Shapley, e e por isso que serve: com o conjunto COMPLETO dos
+      # casamentos estaveis em maos, os teoremas viram afirmacoes conferiveis em
+      # vez de notas de rodape.
+      #
+      # Sao quatro, cada um em 600 instancias: o conjunto nunca e vazio; o
+      # resultado esta nele; ele da a CADA propoente o melhor par estavel possivel
+      # ao mesmo tempo; e da a CADA recebedor o PIOR. O terceiro nao e obvio,
+      # porque nada na definicao impede que o melhor de um exija o pior de outro.
+      #
+      # Os outros dois tambem tem juiz por forca bruta: emparelhamento maximo
+      # contra os 2^E subconjuntos de arestas, e o hungaro contra as n!
+      # permutacoes. E Berge e conferido nos DOIS sentidos, que e o que um teste
+      # de "se e somente se" precisa fazer.
+      - name: testes
+        run: dotnet test testes/Emparelhamento.Testes/Emparelhamento.Testes.csproj -c Release --nologo -v q
+
+      # As medidas rodam para REGISTRAR numeros. Nao ha asseveracao de tempo.
+      - name: o vies de quem propoe
+        run: dotnet run --project ferramentas/Medidor/Medidor.csproj -c Release --nologo -- vies
+
+      - name: quantos casamentos estaveis existem
+        run: dotnet run --project ferramentas/Medidor/Medidor.csproj -c Release --nologo -- quantos
+
+      - name: fases do hopcroft-karp
+        run: dotnet run --project ferramentas/Medidor/Medidor.csproj -c Release --nologo -- fases
